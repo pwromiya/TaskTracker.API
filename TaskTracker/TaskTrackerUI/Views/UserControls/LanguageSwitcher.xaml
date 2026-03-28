@@ -1,0 +1,19 @@
+﻿<!-- Language switcher component (standalone UserControl) -->
+<UserControl x:Class="TaskTracker.UI.Views.UserControls.LanguageSwitcher"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Height="40" Width="200">
+
+    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+        <!-- Language selection buttons (bound to DataContext commands) -->
+        <Button Content="RU" 
+                Command="{Binding SetLangRuCommand}"
+                Width="50" Margin="2"/>
+        <Button Content="EN" 
+                Command="{Binding SetLangEnCommand}"
+                Width="50" Margin="2"/>
+        <Button Content="BE" 
+                Command="{Binding SetLangBeCommand}"
+                Width="50" Margin="2"/>
+    </StackPanel>
+</UserControl>

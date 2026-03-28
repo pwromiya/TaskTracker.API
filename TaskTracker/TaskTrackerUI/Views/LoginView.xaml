@@ -1,0 +1,34 @@
+﻿<!-- Login window view -->
+<Window x:Class="TaskTracker.UI.Views.LoginView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:TaskTracker.UI.Views.UserControls"
+        Title="{DynamicResource LogInAcc}" 
+        MinWidth="250"
+        MinHeight="350"
+        MaxWidth="350"
+        MaxHeight="550"
+        SizeToContent="Height"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+
+    <StackPanel Margin="20" VerticalAlignment="Center">
+        <!-- Language selection buttons -->
+        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+            <local:LanguageSwitcher/>
+        </StackPanel>
+
+        <!-- Login credentials input -->
+        <TextBlock Text="{DynamicResource Login}"/>
+        <TextBox Text="{Binding Login}" Margin="0,5"/>
+
+        <TextBlock Text="{DynamicResource Password}"/>
+        <PasswordBox x:Name="PasswordBox" Margin="0,5"/>
+
+        <!-- Login button with password as command parameter -->
+        <Button Content="{DynamicResource LogInAcc}"
+                Click="LoginButton_Click"
+                CommandParameter="{Binding ElementName=PasswordBox, Path=Password}"
+                Margin="0,10"/>
+    </StackPanel>
+</Window>

@@ -1,0 +1,194 @@
+﻿<UserControl x:Class="TaskTracker.UI.Views.UserControls.WorkSpaceView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:TaskTracker.UI.Converters"
+             xmlns:local="clr-namespace:TaskTracker.UI.Views.UserControls"
+             xmlns:views="clr-namespace:TaskTracker.UI.Views.UserControls"
+             xmlns:vm="clr-namespace:TaskTracker.UI.ViewModels">
+
+
+    <UserControl.Resources>
+        <!-- Converters -->
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+    </UserControl.Resources>
+
+    <Grid Margin="10">
+
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- LEFT PANEL -->
+        <StackPanel Grid.Column="0">
+            <!-- Language switcher -->
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <local:LanguageSwitcher/>
+            </StackPanel>
+
+            <!-- Current user -->
+            <TextBlock Text="{Binding CurrentUser.Login}" FontWeight="Bold" Margin="0,0,0,10"/>
+
+            <!-- Add project -->
+            <Button Content="{DynamicResource PlusProj}" Command="{Binding ShowAddProjectCommand}" Margin="0,0,0,10"/>
+
+            <!-- Projects list -->
+            <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="400">
+                <ListBox ItemsSource="{Binding ProjectsVM.Projects}" SelectedItem="{Binding ProjectsVM.SelectedProject}" DisplayMemberPath="Name"/>
+            </ScrollViewer>
+        </StackPanel>
+
+        <!-- RIGHT PANEL -->
+        <Grid Grid.Column="1" Margin="10,0,0,0">
+
+
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- PROJECT INFORMATION -->
+            <Border Grid.Row="0"
+                    BorderThickness="1"
+                    BorderBrush="LightGray"
+                    Background="#F5F5F5"
+                    Padding="10"
+                    Margin="0,0,0,15"
+                    CornerRadius="5"
+                    Visibility="{Binding ProjectsVM.SelectedProject, Converter={StaticResource NullToVisibilityConverter}}">
+
+                <StackPanel>
+                    <DockPanel Margin="0,0,0,8">
+                        <TextBlock Text="{DynamicResource ProjInf}" FontWeight="Bold" FontSize="14" DockPanel.Dock="Left"/>
+                        <Button Content="{DynamicResource Edit}" DockPanel.Dock="Right" Command="{Binding ShowEditProjectCommand}" CommandParameter="{Binding ProjectsVM.SelectedProject}" Padding="8,3" FontSize="12" Background="#2196F3" Foreground="White" Width="120"/>
+                        <Button Content="{DynamicResource Del}" DockPanel.Dock="Right" Command="{Binding ProjectsVM.DeleteProjectCommand}" CommandParameter="{Binding ProjectsVM.SelectedProject}" Padding="8,3" FontSize="12" Background="#F44336" Foreground="White" Width="120"/>
+                    </DockPanel>
+
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="{DynamicResource ID}" FontWeight="SemiBold" Margin="0,0,5,5"/>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ProjectsVM.SelectedProject.Id}" Margin="0,0,0,5"/>
+
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="{DynamicResource Name}" FontWeight="SemiBold" Margin="0,0,5,5"/>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding ProjectsVM.SelectedProject.Name}" FontSize="13" Margin="0,0,0,5"/>
+
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="{DynamicResource Created}" FontWeight="SemiBold" Margin="0,0,5,5"/>
+                        <TextBlock Grid.Row="2" Grid.Column="1" Margin="0,0,0,5" Text="{Binding ProjectsVM.SelectedProject.CreatedAt, StringFormat=dd.MM.yyyy HH:mm}"/>
+
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="{DynamicResource Desc}" FontWeight="SemiBold" Margin="0,0,5,5"/>
+                        <TextBlock Grid.Row="3" Grid.Column="1" TextWrapping="Wrap" Margin="0,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Text" Value="{Binding ProjectsVM.SelectedProject.Description}"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding ProjectsVM.SelectedProject.Description}" Value="{x:Null}">
+                                            <Setter Property="Text" Value="{DynamicResource NoDescription}"/>
+                                            <Setter Property="Foreground" Value="Gray"/>
+                                            <Setter Property="FontStyle" Value="Italic"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                    </Grid>
+                </StackPanel>
+
+            </Border>
+
+            <!-- TASKS LIST -->
+            <StackPanel Grid.Row="1" Visibility="{Binding SelectedProject, Converter={StaticResource NullToVisibilityConverter}}">
+                <TextBlock Text="{DynamicResource ProjTasks}" FontWeight="Bold" Margin="0,0,0,10"/>
+                <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="250">
+                    <ItemsControl ItemsSource="{Binding TasksVM.ProjectTasks}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderThickness="1" BorderBrush="LightGray" Padding="10" Margin="0,0,0,8" CornerRadius="3" Background="White">
+                                    <StackPanel>
+                                        <DockPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="Bold" DockPanel.Dock="Left"/>
+                                            <Button Content="{DynamicResource Edit}" Width="100" DockPanel.Dock="Right"
+                                                    Command="{Binding DataContext.ShowEditTaskCommand, RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                                    CommandParameter="{Binding}"
+                                                    Padding="5,3"
+                                                    Background="#2196F3" Foreground="White"
+                                                    BorderThickness="0"/>
+                                            <Button Content="{DynamicResource Del}" Width="100"
+                                            Command="{Binding DataContext.TasksVM.DeleteTaskCommand,
+                                                      RelativeSource={RelativeSource AncestorType=UserControl}}"
+                                            CommandParameter="{Binding}"
+                                            Padding="5,3"
+                                            Background="#F44336" Foreground="White"
+                                            BorderThickness="0"/>
+                                        </DockPanel>
+                                        <TextBlock TextWrapping="Wrap" FontSize="12" Foreground="#666" Margin="0,5,0,8">
+                                            <TextBlock.Text>
+                                                <Binding Path="Description"/>
+                                            </TextBlock.Text>
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Description}" Value="{x:Null}">
+                                                            <Setter Property="Text" Value="{DynamicResource NoDescription}"/>
+                                                            <Setter Property="Foreground" Value="#999"/>
+                                                            <Setter Property="FontStyle" Value="Italic"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Description}" Value="">
+                                                            <Setter Property="Text" Value="{DynamicResource NoDescription}"/>
+                                                            <Setter Property="Foreground" Value="#999"/>
+                                                            <Setter Property="FontStyle" Value="Italic"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                        <TextBlock>
+                                            <Run Text="{Binding CreatedAt, StringFormat=dd.MM.yyyy HH:mm}"/>
+                                        </TextBlock>
+                                        <TextBlock Text="{Binding StatusText}" />
+
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </ScrollViewer>
+
+                <!-- Add new task -->
+                <StackPanel>
+                    <Button Content="{DynamicResource PlusTask}" Command="{Binding ShowAddTaskCommand}" HorizontalAlignment="Left" Padding="12,5"/>
+                </StackPanel>
+            </StackPanel>
+        </Grid>
+
+        <!-- POPUPS -->
+        <Grid Grid.ColumnSpan="2" Grid.RowSpan="2" Panel.ZIndex="1000" 
+              Visibility="{Binding CurrentDialog, Converter={StaticResource NullToVisibilityConverter}}">
+            <ContentControl Content="{Binding CurrentDialog}">
+                <ContentControl.Resources>
+
+                    <DataTemplate DataType="{x:Type vm:EditProjectViewModel}">
+                        <views:EditProjectControl/>
+                    </DataTemplate>
+
+                    <DataTemplate DataType="{x:Type vm:EditTaskViewModel}">
+                        <views:EditTaskControl/>
+                    </DataTemplate>
+
+                </ContentControl.Resources>
+            </ContentControl>
+        </Grid>
+    </Grid>
+</UserControl>

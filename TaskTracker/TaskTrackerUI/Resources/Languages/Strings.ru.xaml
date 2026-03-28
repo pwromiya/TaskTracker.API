@@ -1,0 +1,63 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Add">Добавить</sys:String>
+    <sys:String x:Key="AddingProj">Добавление проекта</sys:String>
+    <sys:String x:Key="AddTask">Добавить задачу</sys:String>
+    <sys:String x:Key="Cancel">Отмена</sys:String>
+    <sys:String x:Key="CurUser">Текущий пользователь</sys:String>
+    <sys:String x:Key="Del">Удалить</sys:String>
+    <sys:String x:Key="Desc">Описание</sys:String>
+    <sys:String x:Key="InvitationToLogIn">Уже есть аккаунт? Войти</sys:String>
+    <sys:String x:Key="Login">Логин</sys:String>
+    <sys:String x:Key="LogInAcc">Войти</sys:String>
+    <sys:String x:Key="LogOut">Выйти из своего аккаунта</sys:String>
+    <sys:String x:Key="Name">Название</sys:String>
+    <sys:String x:Key="TaskName">Название задачи</sys:String>
+    <sys:String x:Key="ProjName">Название проекта</sys:String>
+    <sys:String x:Key="NewPassw">Новый пароль</sys:String>
+    <sys:String x:Key="Password">Пароль</sys:String>
+    <sys:String x:Key="PlusProj">+ Проект</sys:String>
+    <sys:String x:Key="PlusTask">+ Новая задача</sys:String>
+    <sys:String x:Key="Profile">Профиль</sys:String>
+    <sys:String x:Key="Projects">Проекты</sys:String>
+    <sys:String x:Key="ProjInf">Информация о проекте</sys:String>
+    <sys:String x:Key="ProjTasks">Задачи проекта</sys:String>
+    <sys:String x:Key="Register">Зарегистрироваться</sys:String>
+    <sys:String x:Key="Save">Сохранить</sys:String>
+    <sys:String x:Key="Edit">Редактировать</sys:String>
+    <sys:String x:Key="Created">Создан</sys:String>
+    <sys:String x:Key="NoDescription">(нет описания)</sys:String>
+    <sys:String x:Key="ID">ID</sys:String>
+    <sys:String x:Key="TaskCreated">Создано</sys:String>
+    <sys:String x:Key="MainWindow">Главное окно</sys:String>
+    <sys:String x:Key="EnterPassword">Введите новый пароль</sys:String>
+    <sys:String x:Key="PasswordUpdated">Пароль успешно обновлен</sys:String>
+    <sys:String x:Key="ErrorSaving">Ошибка сохранения</sys:String>
+    <sys:String x:Key="Confirm">Подтверждение</sys:String>
+    <sys:String x:Key="DeleteProjectConfirm">Удалить проект '{0}'?</sys:String>
+    <sys:String x:Key="DeleteTaskConfirm">Удалить задачу '{0}'?</sys:String>
+    <sys:String x:Key="EnterProjectName">Введите название проекта</sys:String>
+    <sys:String x:Key="EnterTaskTitle">Введите название задачи</sys:String>
+    <sys:String x:Key="EditProject">Редактировать проект</sys:String>
+    <sys:String x:Key="EditTask">Редактировать задачу</sys:String>
+    <sys:String x:Key="EnterLogin">Введите логин!</sys:String>
+    <sys:String x:Key="UserAlreadyExists">Такой логин уже существует!</sys:String>
+    <sys:String x:Key="RegistrationSuccess">Пользователь '{0}' успешно зарегистрирован! ID = {1}</sys:String>
+    <sys:String x:Key="LoginSuccess">Пользователь '{0}' добро пожаловать! ID = {1}</sys:String>
+    <sys:String x:Key="RegistrationError">Ошибка при регистрации</sys:String>
+    <sys:String x:Key="EnterCredentials">Введите логин и пароль</sys:String>
+    <sys:String x:Key="InvalidLoginOrPassword">Неверный логин или пароль</sys:String>
+
+    <sys:String x:Key="DbReadFailed">Ошибка при чтении из базы данных.</sys:String>
+    <sys:String x:Key="DbAddFailed">Ошибка при добавлении записи в базу.</sys:String>
+    <sys:String x:Key="DbDeleteFailed">Ошибка при удалении записи.</sys:String>
+    <sys:String x:Key="DbSaveFailed">Ошибка при сохранении изменений.</sys:String>
+    <sys:String x:Key="ProjectNameEmpty">Название проекта не может быть пустым.</sys:String>
+    <sys:String x:Key="TaskNameEmpty">Название задачи не может быть пустым.</sys:String>
+    <sys:String x:Key="UnexpectedError">Произошла непредвиденная ошибка.</sys:String>
+    <sys:String x:Key="PasswordEmpty">Пароль не может быть пустым</sys:String>
+    <sys:String x:Key="UserNotFound">Пользователь не найден</sys:String>
+
+</ResourceDictionary>
