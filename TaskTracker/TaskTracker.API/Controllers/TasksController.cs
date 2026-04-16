@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Contracts.Requests;
+using TaskTracker.Contracts.Responses;
+using TaskTracker.Domain.Common;
 
 namespace TaskTracker.API.Controllers;
 /// <summary>
@@ -31,10 +33,22 @@ public class TasksController : ControllerBase
     ///   - 401 Unauthorized if the user is not authenticated.
     /// </returns>
     [HttpGet("project/{projectId}")]
-    public async Task<ActionResult<List<TaskDto>>> GetByProject(int projectId)
+    public async Task<IActionResult> GetByProject(int projectId)
     {
-        var tasks = await _taskService.GetByProjectIdAsync(projectId);
-        return Ok(tasks);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim.Value);
+            var tasks = await _taskService.GetByProjectIdForUserAsync(projectId, userId);
+            return Ok(tasks);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -47,11 +61,20 @@ public class TasksController : ControllerBase
     ///   - 401 Unauthorized if the user is not authenticated.
     /// </returns>
     [HttpGet("GetById/{taskId}")]
-    public async Task<ActionResult<TaskDto?>> GetById(int taskId)
+    public async Task<IActionResult> GetById(int taskId)
     {
-        var task = await _taskService.GetByIdAsync(taskId);
-        if (task == null) return NotFound();
-        return Ok(task);
+        try
+        {
+            var task = await _taskService.GetByIdAsync(taskId);
+            if (task == null)
+                return NotFound(new ErrorResponse { TranslationKey = "TaskNotFound" });
+
+            return Ok(task);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -64,25 +87,32 @@ public class TasksController : ControllerBase
     ///   - 401 Unauthorized if the user is not authenticated.
     /// </returns>
     [HttpPost]
-    public async Task<ActionResult<TaskDto>> CreateTask([FromBody] CreateTaskRequest request)
+    public async Task<IActionResult> CreateTask([FromBody] CreateTaskRequest request)
     {
-        var created = await _taskService.CreateTaskAsync(
-            request.Title,
-            request.Description,
-            request.ProjectId,
-            request.Status
-        );
-
-        var taskDto = new TaskDto
+        try
         {
-            Id = created.Id,
-            Title = created.Title,
-            Description = created.Description,
-            Status = (int)created.Status,
-            CreatedAt = created.CreatedAt
-        };
+            var created = await _taskService.CreateTaskAsync(
+                request.Title,
+                request.Description,
+                request.ProjectId,
+                request.Status
+            );
 
-        return CreatedAtAction(nameof(GetById), new { taskId = created.Id }, taskDto);
+            var taskDto = new TaskDto
+            {
+                Id = created.Id,
+                Title = created.Title,
+                Description = created.Description,
+                Status = (int)created.Status,
+                CreatedAt = created.CreatedAt
+            };
+
+            return CreatedAtAction(nameof(GetById), new { taskId = created.Id }, taskDto);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -99,15 +129,24 @@ public class TasksController : ControllerBase
     [HttpPut("{taskId}")]
     public async Task<IActionResult> UpdateTask(int taskId, [FromBody] TaskDto task)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-        if (userIdClaim == null)
-            return Unauthorized();
+            if (!Enum.IsDefined(typeof(Domain.Models.TaskStatus), task.Status))
+                return BadRequest(new ErrorResponse { TranslationKey = "InvalidTaskStatus" });
 
-        var userId = int.Parse(userIdClaim.Value);
-        var domainStatus = (Domain.Models.TaskStatus)task.Status;
-        await _taskService.UpdateTaskAsync(taskId, task.Title, task.Description, domainStatus, userId);
-        return NoContent();
+            var userId = int.Parse(userIdClaim.Value);
+            var domainStatus = (Domain.Models.TaskStatus)task.Status;
+            await _taskService.UpdateTaskAsync(taskId, task.Title, task.Description, domainStatus, userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -123,14 +162,20 @@ public class TasksController : ControllerBase
     [HttpDelete("{taskId}")]
     public async Task<IActionResult> DeleteTask(int taskId)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-        if (userIdClaim == null)
-            return Unauthorized();
-
-        var userId = int.Parse(userIdClaim.Value);
-        await _taskService.DeleteTaskAsync(taskId, userId);
-        return NoContent();
+            var userId = int.Parse(userIdClaim.Value);
+            await _taskService.DeleteTaskAsync(taskId, userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -144,9 +189,30 @@ public class TasksController : ControllerBase
     ///   - 401 Unauthorized if the user is not authenticated.
     /// </returns>
     [HttpGet("CanModify/{taskId}/{userId}")]
-    public async Task<ActionResult<bool>> CanUserModify(int taskId, int userId)
+    public async Task<IActionResult> CanUserModify(int taskId, int userId)
     {
-        var canModify = await _taskService.CanUserModifyTaskAsync(taskId, userId);
-        return Ok(canModify);
+        try
+        {
+            var canModify = await _taskService.CanUserModifyTaskAsync(taskId, userId);
+            return Ok(canModify);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
+    }
+
+    private IActionResult ToErrorResponse(Exception ex)
+    {
+        return ex switch
+        {
+            AppException appEx when appEx.UserMessage == "AccessDenied"
+                => StatusCode(StatusCodes.Status403Forbidden, new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            AppException appEx when appEx.UserMessage == "TaskNotFound" || appEx.UserMessage == "ProjectNotFound"
+                => NotFound(new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            AppException appEx
+                => BadRequest(new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            _ => StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse { TranslationKey = "UnexpectedError" })
+        };
     }
 }

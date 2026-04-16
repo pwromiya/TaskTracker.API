@@ -1,0 +1,70 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:sys="clr-namespace:System;assembly=mscorlib">
+
+    <sys:String x:Key="Add">Add</sys:String>
+    <sys:String x:Key="AddingProj">Adding a project</sys:String>
+    <sys:String x:Key="AddTask">Add a task</sys:String>
+    <sys:String x:Key="Cancel">Cancel</sys:String>
+    <sys:String x:Key="CurUser">Current user</sys:String>
+    <sys:String x:Key="Del">Delete</sys:String>
+    <sys:String x:Key="Desc">Description</sys:String>
+    <sys:String x:Key="InvitationToLogIn">Already have an account? Log in</sys:String>
+    <sys:String x:Key="Login">Login</sys:String>
+    <sys:String x:Key="LogInAcc">Log in</sys:String>
+    <sys:String x:Key="LogOut">Log out of your account</sys:String>
+    <sys:String x:Key="Name">Name</sys:String>
+    <sys:String x:Key="TaskName">Task name</sys:String>
+    <sys:String x:Key="ProjName">Project name</sys:String>
+    <sys:String x:Key="NewPassw">New password</sys:String>
+    <sys:String x:Key="Password">Password</sys:String>
+    <sys:String x:Key="PlusProj">+ Project</sys:String>
+    <sys:String x:Key="PlusTask">+ New task</sys:String>
+    <sys:String x:Key="Profile">Profile</sys:String>
+    <sys:String x:Key="Projects">Projects</sys:String>
+    <sys:String x:Key="ProjInf">Project information</sys:String>
+    <sys:String x:Key="ProjTasks">Project tasks</sys:String>
+    <sys:String x:Key="Register">Register</sys:String>
+    <sys:String x:Key="Save">Save</sys:String>
+    <sys:String x:Key="Edit">Edit</sys:String>
+    <sys:String x:Key="Created">Created</sys:String>
+    <sys:String x:Key="NoDescription">(no description)</sys:String>
+    <sys:String x:Key="ID">ID</sys:String>
+    <sys:String x:Key="TaskCreated">Created</sys:String>
+    <sys:String x:Key="MainWindow">Main Window</sys:String>
+    <sys:String x:Key="EnterPassword">Enter a new password</sys:String>
+    <sys:String x:Key="PasswordUpdated">Password successfully updated</sys:String>
+    <sys:String x:Key="ErrorSaving">Error saving</sys:String>
+    <sys:String x:Key="Confirm">Confirm</sys:String>
+    <sys:String x:Key="DeleteProjectConfirm">Delete project '{0}'?</sys:String>
+    <sys:String x:Key="DeleteTaskConfirm">Delete task '{0}'?</sys:String>
+    <sys:String x:Key="EnterProjectName">Enter project name</sys:String>
+    <sys:String x:Key="EnterTaskTitle">Enter task title</sys:String>
+    <sys:String x:Key="EditProject">Edit Project</sys:String>
+    <sys:String x:Key="EditTask">Edit Task</sys:String>
+    <sys:String x:Key="EnterLogin">Enter login!</sys:String>
+    <sys:String x:Key="UserAlreadyExists">This login already exists!</sys:String>
+    <sys:String x:Key="RegistrationSuccess">User '{0}' successfully registered! ID = {1}</sys:String>
+    <sys:String x:Key="LoginSuccess">User '{0}' welcome! ID = {1}</sys:String>
+    <sys:String x:Key="RegistrationError">Registration error</sys:String>
+    <sys:String x:Key="EnterCredentials">Enter login and password</sys:String>
+    <sys:String x:Key="InvalidLoginOrPassword">Invalid login or password</sys:String>
+
+    <sys:String x:Key="DbReadFailed">Failed to read from database.</sys:String>
+    <sys:String x:Key="DbAddFailed">Failed to add record to database.</sys:String>
+    <sys:String x:Key="DbDeleteFailed">Failed to delete record.</sys:String>
+    <sys:String x:Key="DbSaveFailed">Failed to save changes.</sys:String>
+    <sys:String x:Key="ProjectNameEmpty">Project name cannot be empty.</sys:String>
+    <sys:String x:Key="TaskNameEmpty">Task name cannot be empty.</sys:String>
+    <sys:String x:Key="UnexpectedError">An unexpected error occurred.</sys:String>
+    <sys:String x:Key="PasswordEmpty">Password cannot be empty</sys:String>
+    <sys:String x:Key="UserNotFound">User not found</sys:String>
+
+    <sys:String x:Key="ProjectNameAlreadyExists">A project with this name already exists!</sys:String>
+    <sys:String x:Key="ProjectNotFound">Project not found.</sys:String>
+    <sys:String x:Key="TaskNotFound">Task not found.</sys:String>
+    <sys:String x:Key="AccessDenied">You do not have permission to perform this action.</sys:String>
+    <sys:String x:Key="InvalidTaskStatus">Invalid task status.</sys:String>
+    <sys:String x:Key="ErrorConnectionRefused">Cannot connect to the server.</sys:String>
+
+</ResourceDictionary>

@@ -37,6 +37,8 @@ public class TaskService : ITaskService
         var project = await _projectRepository.GetByIdAsync(projectId);
         if (project == null)
             throw new AppException("ProjectNotFound");
+        if (!Enum.IsDefined(typeof(Domain.Models.TaskStatus), status))
+            throw new AppException("InvalidTaskStatus");
 
         var task = new ProjectTask
         {
@@ -65,6 +67,16 @@ public class TaskService : ITaskService
     {
         return await _repository.GetByProjectIdAsync(projectId);
     }
+    public async Task<List<ProjectTask>> GetByProjectIdForUserAsync(int projectId, int userId)
+    {
+        var project = await _projectRepository.GetByIdAsync(projectId);
+        if (project == null)
+            throw new AppException("ProjectNotFound");
+        if (project.UserId != userId)
+            throw new AppException("AccessDenied");
+
+        return await _repository.GetByProjectIdAsync(projectId);
+    }
 
     public async Task<ProjectTask?> GetByIdAsync(int taskId)
     {
@@ -81,11 +93,11 @@ public class TaskService : ITaskService
     {
         var task = await _repository.GetByIdAsync(taskId);
         if (task == null)
-            throw new InvalidOperationException("Task not found");
+            throw new AppException("TaskNotFound");
 
         // Only owner can modify
         if (!await CanUserModifyTaskAsync(taskId, userId))
-            throw new UnauthorizedAccessException("No permission");
+            throw new AppException("AccessDenied");
 
         // Update Title
         if (string.IsNullOrWhiteSpace(title))
@@ -134,11 +146,11 @@ public class TaskService : ITaskService
     {
         var task = await _repository.GetByIdAsync(taskId);
         if (task == null)
-            return;
+            throw new AppException("TaskNotFound");
 
         // Only owner can delete
         if (!await CanUserModifyTaskAsync(taskId, userId))
-            throw new UnauthorizedAccessException("No permission");
+            throw new AppException("AccessDenied");
 
         _repository.Remove(task);
         await _repository.SaveChangesAsync();

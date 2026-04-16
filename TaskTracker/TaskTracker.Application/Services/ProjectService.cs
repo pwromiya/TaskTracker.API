@@ -24,8 +24,9 @@ public class ProjectService : IProjectService
     {
         // Valid project name 
         if (string.IsNullOrWhiteSpace(name))
-            throw new AppException("ProjectNameEmpty");
-
+            throw new DomainException("ProjectNameEmpty");
+        if (await _repository.ExistsAsync(name.Trim(), userId))
+            throw new DomainException("ProjectNameAlreadyExists");
         var project = new Project
         {
             Name = name.Trim(),
@@ -68,11 +69,11 @@ public class ProjectService : IProjectService
     {
         var project = await _repository.GetByIdAsync(projectId);
         if (project == null)
-            throw new InvalidOperationException("Project not found");
+            throw new AppException("ProjectNotFound");
 
         // Only owner can modify
         if (project.UserId != userId)
-            throw new UnauthorizedAccessException("No permission");
+            throw new AppException("AccessDenied");
 
         // Update Name
         if (string.IsNullOrWhiteSpace(name))
@@ -112,11 +113,11 @@ public class ProjectService : IProjectService
     {
         var project = await _repository.GetByIdAsync(projectId);
         if (project == null)
-            return;
+            throw new AppException("ProjectNotFound");
 
         // Only owner can delete
         if (project.UserId != userId)
-            throw new UnauthorizedAccessException("No permission");
+            throw new AppException("AccessDenied");
 
         _repository.Remove(project);
         await _repository.SaveChangesAsync();

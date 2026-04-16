@@ -1,8 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using TaskTracker.Contracts.Responses;
 using TaskTracker.Application.Interfaces;
 using TaskTracker.Domain.Models;
+using TaskTracker.Domain.Common;
 using TaskTracker.Contracts.Requests;
 
 namespace TaskTracker.API.Controllers;
@@ -34,10 +36,20 @@ public class ProjectsController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetMyProjects()
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-        var projects = await _projectService.GetUserProjectsAsync(userId);
-        return Ok(projects);
+            var userId = int.Parse(userIdClaim.Value);
+            var projects = await _projectService.GetUserProjectsAsync(userId);
+            return Ok(projects);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -50,11 +62,20 @@ public class ProjectsController : ControllerBase
     ///   - 401 Unauthorized if the user is not authenticated.
     /// </returns>
     [HttpGet("GetById/{projectId}")]
-    public async Task<ActionResult<Project?>> GetById(int projectId)
+    public async Task<IActionResult> GetById(int projectId)
     {
-        var project = await _projectService.GetByIdAsync(projectId);
-        if (project == null) return NotFound();
-        return Ok(project);
+        try
+        {
+            var project = await _projectService.GetByIdAsync(projectId);
+            if (project == null)
+                return NotFound(new ErrorResponse { TranslationKey = "ProjectNotFound" });
+
+            return Ok(project);
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -69,18 +90,29 @@ public class ProjectsController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateProject([FromBody] CreateProjectRequest request)
     {
-        var userId = int.Parse(User.FindFirst(ClaimTypes.NameIdentifier).Value);
-
-        var project = await _projectService.CreateProjectAsync(
-            request.Name,
-            request.Description,
-            userId);
-
-        return Ok(new Project
+        try
         {
-            Id = project.Id,
-            Name = project.Name
-        });
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
+
+            var userId = int.Parse(userIdClaim.Value);
+
+            var project = await _projectService.CreateProjectAsync(
+                request.Name,
+                request.Description,
+                userId);
+
+            return Ok(new Project
+            {
+                Id = project.Id,
+                Name = project.Name
+            });
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -97,14 +129,20 @@ public class ProjectsController : ControllerBase
     [HttpPut("{projectId}")]
     public async Task<IActionResult> UpdateProject(int projectId, [FromBody] Project project)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-        if (userIdClaim == null)
-            return Unauthorized();
-
-        var userId = int.Parse(userIdClaim.Value);
-        await _projectService.UpdateProjectAsync(projectId, project.Name, project.Description, userId);
-        return NoContent();
+            var userId = int.Parse(userIdClaim.Value);
+            await _projectService.UpdateProjectAsync(projectId, project.Name, project.Description, userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
     }
 
     /// <summary>
@@ -120,13 +158,35 @@ public class ProjectsController : ControllerBase
     [HttpDelete("{projectId}")]
     public async Task<IActionResult> DeleteProject(int projectId)
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+        try
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim == null)
+                return Unauthorized();
 
-        if (userIdClaim == null)
-            return Unauthorized();
+            var userId = int.Parse(userIdClaim.Value);
+            await _projectService.DeleteProjectAsync(projectId, userId);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return ToErrorResponse(ex);
+        }
+    }
 
-        var userId = int.Parse(userIdClaim.Value);
-        await _projectService.DeleteProjectAsync(projectId, userId);
-        return NoContent();
+    private IActionResult ToErrorResponse(Exception ex)
+    {
+        return ex switch
+        {
+            AppException appEx when appEx.UserMessage == "AccessDenied"
+                => StatusCode(StatusCodes.Status403Forbidden, new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            AppException appEx when appEx.UserMessage == "ProjectNotFound"
+                => NotFound(new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            DomainException domainEx
+                => BadRequest(new ErrorResponse { TranslationKey = domainEx.Message }),
+            AppException appEx
+                => BadRequest(new ErrorResponse { TranslationKey = appEx.UserMessage }),
+            _ => StatusCode(StatusCodes.Status500InternalServerError, new ErrorResponse { TranslationKey = "UnexpectedError" })
+        };
     }
 }

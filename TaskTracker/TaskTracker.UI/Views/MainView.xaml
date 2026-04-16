@@ -1,0 +1,63 @@
+﻿<!-- Main application window with tabbed interface -->
+<Window x:Class="TaskTracker.UI.Views.MainView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:models="clr-namespace:TaskTracker.Domain.Models;assembly=TaskTracker.Domain"
+        xmlns:converters="clr-namespace:TaskTracker.UI.Converters"
+        xmlns:views="clr-namespace:TaskTracker.UI.Views.UserControls"
+        xmlns:vm="clr-namespace:TaskTracker.UI.ViewModels"
+        Title="{DynamicResource MainWindow}"
+        MinWidth="900"
+        MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="CanResize">
+    
+    <Window.Resources>
+        <!-- Register converters for use in XAML -->
+        <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+        <converters:NullToVisibilityConverter x:Key="NullToVisibilityConverter"/>
+    </Window.Resources>
+
+
+    <TabControl Margin="10">
+        <!-- Projects management tab -->
+        <TabItem Header="{DynamicResource Projects}">
+            <views:WorkSpaceView />
+            <!-- Projects user control -->
+        </TabItem>
+
+        <!-- User profile tab -->
+        <TabItem Header="{DynamicResource Profile}">
+            <StackPanel Margin="20"
+            MaxWidth="400"
+            HorizontalAlignment="Left">
+                <TextBlock Text="{DynamicResource Profile}" 
+                           FontWeight="Bold" 
+                           FontSize="16" 
+                           Margin="0,0,0,10"/>
+
+                <!-- Current login display (read-only) -->
+                <TextBlock Text="{DynamicResource Login}" FontWeight="SemiBold"/>
+                <TextBlock Text="{Binding CurrentUser.Login}" 
+                         FontWeight="SemiBold"
+                         Margin="0,0,0,10"/>
+
+                <!-- New password input -->
+                <TextBlock Text="{DynamicResource NewPassw}" FontWeight="SemiBold"/>
+                <PasswordBox x:Name="NewPasswordBox" Margin="0,0,0,10"/>
+
+                <!-- Save profile button -->
+                <Button Content="{DynamicResource Save}" 
+                        Width="150" 
+                        Command="{Binding SaveUserProfileCommand}"
+                        CommandParameter="{Binding ElementName=NewPasswordBox}"/>
+
+                <!-- Logout button -->
+                <Button Content="{DynamicResource LogOut}" 
+                        Width="150" 
+                        Margin="0,10,0,0"
+                        Command="{Binding LogoutCommand}"/>
+            </StackPanel>
+        </TabItem>
+    </TabControl>
+</Window>

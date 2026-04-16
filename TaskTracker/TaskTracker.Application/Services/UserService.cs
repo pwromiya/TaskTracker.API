@@ -18,6 +18,8 @@ public class UserService : IUserService
     {
         if (string.IsNullOrWhiteSpace(login))
             throw new AppException("EnterLogin");
+        if (string.IsNullOrWhiteSpace(password))
+            throw new AppException("PasswordEmpty");
 
         // Check for existing user
         if (await _repository.ExistsAsync(login))
@@ -45,6 +47,12 @@ public class UserService : IUserService
 
     public async Task<User?> LoginAsync(string login, string password)
     {
+        if (string.IsNullOrWhiteSpace(login) || string.IsNullOrWhiteSpace(password))
+        {
+            _logger.LogWarning("Invalid login attempt with empty credentials");
+            return null;
+        }
+
         // Find user by login
         var user = await _repository.GetByLoginAsync(login);
 

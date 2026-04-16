@@ -10,4 +10,6 @@ public interface IProjectRepository
     Task<List<Project>> GetUserProjectsAsync(int userId);
     Task SaveChangesAsync();
     void Remove(Project project);
+    Task<bool> ExistsAsync(string name, int userId);
+
 }

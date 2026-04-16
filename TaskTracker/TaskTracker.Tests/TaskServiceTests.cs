@@ -1,143 +1,97 @@
-using Xunit;
 using Moq;
-using Wpf_Task4.Application.Interfaces;
-using Wpf_Task4.Application.Services;
-using Wpf_Task4.Domain.Models;
-using Wpf_Task4.Domain.Common;
+using TaskTracker.Application.Interfaces;
+using TaskTracker.Application.Services;
+using TaskTracker.Domain.Common;
+using TaskTracker.Domain.Models;
 
-// Testing TaskService from Application layer
+namespace TaskTracker.Tests;
+
 public class TaskServiceTests
 {
-    private readonly Mock<ITaskRepository> _repositoryMock;
-    private readonly Mock<IProjectRepository> _projectRepositoryMock;
-    private readonly Mock<ICurrentUserService> _currentUserMock;
-    private readonly Mock<ILoggerService> _loggerMock;
-
+    private readonly Mock<ITaskRepository> _repositoryMock = new();
+    private readonly Mock<IProjectRepository> _projectRepositoryMock = new();
+    private readonly Mock<ILoggerService> _loggerMock = new();
     private readonly TaskService _service;
 
     public TaskServiceTests()
     {
-        _repositoryMock = new Mock<ITaskRepository>();
-        _projectRepositoryMock = new Mock<IProjectRepository>();
-        _currentUserMock = new Mock<ICurrentUserService>();
-        _loggerMock = new Mock<ILoggerService>();
-
-        _currentUserMock.Setup(c => c.CurrentUser)
-            .Returns(new User { Id = 1 });
-
         _service = new TaskService(
             _repositoryMock.Object,
             _projectRepositoryMock.Object,
-            _currentUserMock.Object,
             _loggerMock.Object);
     }
 
-    // Create
     [Fact]
-    public async Task CreateTaskAsync_Should_Create_Task()
+    public async Task CreateTaskAsync_Throws_InvalidTaskStatus_Key()
     {
-        // Arrange
-        var project = new Project
-        {
-            Id = 5,
-            UserId = 1,
-            Name = "Test Project"
-        };
+        _projectRepositoryMock.Setup(r => r.GetByIdAsync(5))
+            .ReturnsAsync(new Project { Id = 5, UserId = 1, Name = "P" });
 
-        _projectRepositoryMock
-            .Setup(r => r.GetByIdAsync(5))
-            .ReturnsAsync(project);
+        var ex = await Assert.ThrowsAsync<AppException>(() =>
+            _service.CreateTaskAsync("Task", "Desc", 5, 99));
 
-        // Act
-        var result = await _service.CreateTaskAsync("Title", "Desc", 5);
-
-        // Assert
-        Assert.NotNull(result);
-        Assert.Equal("Title", result.Title);
-        Assert.Equal(5, result.ProjectId);
-
-        _repositoryMock.Verify(r => r.AddAsync(It.IsAny<ProjectTask>()), Times.Once);
-        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+        Assert.Equal("InvalidTaskStatus", ex.UserMessage);
     }
 
     [Fact]
-    public async Task CreateTaskAsync_Should_Throw_When_Title_Empty()
+    public async Task UpdateTaskAsync_Throws_TaskNotFound_Key()
     {
-        await Assert.ThrowsAsync<AppException>(() =>
-            _service.CreateTaskAsync("", "Desc", 5));
-    }
-
-    // Update
-    [Fact]
-    public async Task UpdateTaskAsync_Should_Update_Title()
-    {
-        // Arrange
-        var task = new ProjectTask
-        {
-            Id = 1,
-            Title = "Old",
-            ProjectId = 5,
-            Project = new Project { UserId = 1 }
-        };
-
         _repositoryMock.Setup(r => r.GetByIdAsync(1))
-            .ReturnsAsync(task);
+            .ReturnsAsync((ProjectTask?)null);
 
-        _repositoryMock.Setup(r => r.CanUserModifyTaskAsync(1, 1))
-            .ReturnsAsync(true);
+        var ex = await Assert.ThrowsAsync<AppException>(() =>
+            _service.UpdateTaskAsync(1, "Name", "Desc", Domain.Models.TaskStatus.Todo, 1));
 
-        // Act
-        await _service.UpdateTaskAsync(1, "New", null, null);
-
-        // Assert
-        Assert.Equal("New", task.Title);
-        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+        Assert.Equal("TaskNotFound", ex.UserMessage);
     }
 
     [Fact]
-    public async Task UpdateTaskAsync_Should_Throw_When_NotOwner()
+    public async Task DeleteTaskAsync_Throws_AccessDenied_Key()
     {
-        // Arrange
-        var task = new ProjectTask
-        {
-            Id = 1,
-            Project = new Project { UserId = 2 }
-        };
-
         _repositoryMock.Setup(r => r.GetByIdAsync(1))
-            .ReturnsAsync(task);
-
+            .ReturnsAsync(new ProjectTask
+            {
+                Id = 1,
+                ProjectId = 2,
+                Project = new Project { Id = 2, UserId = 22, Name = "P" },
+                Title = "T"
+            });
         _repositoryMock.Setup(r => r.CanUserModifyTaskAsync(1, 1))
             .ReturnsAsync(false);
 
-        // Assert
-        await Assert.ThrowsAsync<UnauthorizedAccessException>(() =>
-            _service.UpdateTaskAsync(1, "New", null, null));
+        var ex = await Assert.ThrowsAsync<AppException>(() =>
+            _service.DeleteTaskAsync(1, 1));
+
+        Assert.Equal("AccessDenied", ex.UserMessage);
     }
 
-    // Delete
     [Fact]
-    public async Task DeleteTaskAsync_Should_Remove_Task()
+    public async Task GetByProjectIdForUserAsync_Throws_AccessDenied_For_Foreign_Project()
     {
-        // Arrange
-        var task = new ProjectTask
-        {
-            Id = 1,
-            ProjectId = 5,
-            Project = new Project { UserId = 1 }
-        };
+        _projectRepositoryMock.Setup(r => r.GetByIdAsync(5))
+            .ReturnsAsync(new Project { Id = 5, UserId = 99, Name = "Foreign" });
 
-        _repositoryMock.Setup(r => r.GetByIdAsync(1))
-            .ReturnsAsync(task);
+        var ex = await Assert.ThrowsAsync<AppException>(() =>
+            _service.GetByProjectIdForUserAsync(5, 1));
 
-        _repositoryMock.Setup(r => r.CanUserModifyTaskAsync(1, 1))
-            .ReturnsAsync(true);
+        Assert.Equal("AccessDenied", ex.UserMessage);
+    }
 
-        // Act
-        await _service.DeleteTaskAsync(1);
+    [Fact]
+    public async Task GetByProjectIdForUserAsync_Returns_Tasks_For_Owner_Project()
+    {
+        _projectRepositoryMock.Setup(r => r.GetByIdAsync(5))
+            .ReturnsAsync(new Project { Id = 5, UserId = 1, Name = "Own" });
+        _repositoryMock.Setup(r => r.GetByProjectIdAsync(5))
+            .ReturnsAsync(new List<ProjectTask>
+            {
+                new() { Id = 1, Title = "T1", ProjectId = 5 },
+                new() { Id = 2, Title = "T2", ProjectId = 5 }
+            });
 
-        // Assert
-        _repositoryMock.Verify(r => r.Remove(task), Times.Once);
-        _repositoryMock.Verify(r => r.SaveChangesAsync(), Times.Once);
+        var result = await _service.GetByProjectIdForUserAsync(5, 1);
+
+        Assert.Equal(2, result.Count);
+        Assert.All(result, t => Assert.Equal(5, t.ProjectId));
     }
 }

@@ -85,4 +85,9 @@ public class EfProjectRepository : IProjectRepository
         }
     }
 
+    public async Task<bool> ExistsAsync(string name, int userId)
+    {
+        return await _context.Projects.AnyAsync(p => p.Name == name && p.UserId == userId);
+    }
+
 }

@@ -7,6 +7,7 @@ public interface ITaskService
 {
     Task<ProjectTask> CreateTaskAsync(string title, string? description, int projectId, int status);
     Task<List<ProjectTask>> GetByProjectIdAsync(int projectId);
+    Task<List<ProjectTask>> GetByProjectIdForUserAsync(int projectId, int userId);
     Task<ProjectTask?> GetByIdAsync(int taskId);
     Task UpdateTaskAsync(int taskId, string? title, string? description, Domain.Models.TaskStatus? status, int userId);
     Task DeleteTaskAsync(int taskId, int userId);

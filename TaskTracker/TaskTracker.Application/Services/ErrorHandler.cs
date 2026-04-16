@@ -24,24 +24,18 @@ public class ErrorHandler : IErrorHandler
     {
         LogError(ex);
 
-        // Determining message key
         string messageKey = ex switch
         {
-            // Business exception
             AppException appEx => appEx.UserMessage,
+            DomainException domainEx => domainEx.Message,
 
-            // Validation or argument error
+            HttpRequestException httpEx => "ErrorConnectionRefused",
+
             ArgumentException argEx => argEx.Message,
-
-            // Unexpected error
             _ => "UnexpectedError"
         };
 
-        // Get localized text
-        string message = _languageService.GetString(messageKey);
-
-        // Display error message to user via abstraction
-        _messageService.ShowError(message);
+        _messageService.ShowError(_languageService.GetString(messageKey));
     }
 
     private void LogError(Exception ex)
