@@ -22,6 +22,8 @@ public class ProjectApiService : IProjectApiService
     /// <inheritdoc />
     public async Task<List<ProjectDto>> GetProjectsAsync()
     {
+        _httpClient.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenStorage.Token);
         var response = await _httpClient.GetAsync("api/projects");
 
         if (!response.IsSuccessStatusCode)
@@ -33,6 +35,8 @@ public class ProjectApiService : IProjectApiService
     /// <inheritdoc />
     public async Task<ProjectDto> CreateProjectAsync(string name, string description)
     {
+        _httpClient.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenStorage.Token);
         var response = await _httpClient.PostAsJsonAsync("api/projects", new CreateProjectRequest
         {
             Name = name,
@@ -61,6 +65,8 @@ public class ProjectApiService : IProjectApiService
     /// <inheritdoc />
     public async Task DeleteProjectAsync(int id)
     {
+        _httpClient.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenStorage.Token);
         var response = await _httpClient.DeleteAsync($"api/projects/{id}");
         if (!response.IsSuccessStatusCode)
             await ApiErrorParser.ThrowFromResponseAsync(response);
@@ -69,6 +75,8 @@ public class ProjectApiService : IProjectApiService
     /// <inheritdoc />
     public async Task UpdateProjectAsync(int id, string name, string? description)
     {
+        _httpClient.DefaultRequestHeaders.Authorization =
+        new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _tokenStorage.Token);
         var response = await _httpClient.PutAsJsonAsync($"api/projects/{id}", new
         {
             name,

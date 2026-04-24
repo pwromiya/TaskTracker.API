@@ -63,10 +63,6 @@ public class TaskService : ITaskService
     }
 
     // Read
-    public async Task<List<ProjectTask>> GetByProjectIdAsync(int projectId)
-    {
-        return await _repository.GetByProjectIdAsync(projectId);
-    }
     public async Task<List<ProjectTask>> GetByProjectIdForUserAsync(int projectId, int userId)
     {
         var project = await _projectRepository.GetByIdAsync(projectId);

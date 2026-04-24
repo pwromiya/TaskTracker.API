@@ -43,7 +43,16 @@ public class TasksController : ControllerBase
 
             var userId = int.Parse(userIdClaim.Value);
             var tasks = await _taskService.GetByProjectIdForUserAsync(projectId, userId);
-            return Ok(tasks);
+            var taskDtos = tasks.Select(t => new TaskDto
+            {
+                Id = t.Id,
+                Title = t.Title,
+                Description = t.Description,
+                Status = (int)t.Status,
+                CreatedAt = t.CreatedAt
+            }).ToList();
+
+            return Ok(taskDtos);
         }
         catch (Exception ex)
         {
